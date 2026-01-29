@@ -2,7 +2,7 @@ name: Jira Integration
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 */1 * * *' # Runs every hour
+    - cron: '0 */1 * * *'
 
 jobs:
   run-integration:
@@ -16,18 +16,14 @@ jobs:
           port_client_secret: ${{ secrets.PORT_CLIENT_SECRET }}
           port_base_url: "https://api.port.io"
           config: |
-            # ---------------------------------------------------------
-            # 
             jira_host: "https://solomonron.atlassian.net"
             atlassian_user_email: "solomonron@gmail.com"
-            # ---------------------------------------------------------
-            
             atlassian_user_token: ${{ secrets.JIRA_API_TOKEN }}
             
             resources:
               - kind: issue
                 selector:
-                  query: "true"
+                  query: "ORDER BY created DESC"
                 port:
                   entity:
                     mappings:
@@ -42,6 +38,5 @@ jobs:
                         link: .self
                         created_at: .fields.created
                         updated_at: .fields.updated
-                      
                       relations:
                         repository: .fields.components[].name
