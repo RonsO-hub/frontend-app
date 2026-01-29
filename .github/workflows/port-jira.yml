@@ -1,42 +1,34 @@
-name: Jira Integration
-on:
-  workflow_dispatch:
-  schedule:
-    - cron: '0 */1 * * *'
+name: Debug Secrets
+on: workflow_dispatch
 
 jobs:
-  run-integration:
+  debug-secrets:
     runs-on: ubuntu-latest
     steps:
-      - name: Run Jira Integration
-        uses: port-labs/ocean-sail@v1
-        with:
-          type: jira
-          port_client_id: ${{ secrets.PORT_CLIENT_ID }}
-          port_client_secret: ${{ secrets.PORT_CLIENT_SECRET }}
-          port_base_url: "https://api.port.io"
-          config: |
-            jira_host: "https://solomonron.atlassian.net"
-            atlassian_user_email: "solomonron@gmail.com"
-            atlassian_user_token: ${{ secrets.JIRA_API_TOKEN }}
-            
-            resources:
-              - kind: issue
-                selector:
-                  query: "ORDER BY created DESC"
-                port:
-                  entity:
-                    mappings:
-                      identifier: .key
-                      title: .fields.summary
-                      blueprint: '"jiraIssue"'
-                      properties:
-                        status: .fields.status.name
-                        assignee: .fields.assignee.displayName
-                        description: .fields.description
-                        priority: .fields.priority.name
-                        link: .self
-                        created_at: .fields.created
-                        updated_at: .fields.updated
-                      relations:
-                        repository: .fields.components[].name
+      - name: Test Secrets
+        run: |
+          echo "----------------------------------------------"
+          echo "🔍 SECRET DETECTOR REPORT"
+          echo "----------------------------------------------"
+          
+          if [ -z "${{ secrets.PORT_CLIENT_ID }}" ]; then
+            echo "❌ PORT_CLIENT_ID is MISSING or EMPTY"
+          else
+            echo "✅ PORT_CLIENT_ID is PRESENT (Length: ${#PORT_CLIENT_ID_VAL})"
+          fi
+
+          if [ -z "${{ secrets.PORT_CLIENT_SECRET }}" ]; then
+            echo "❌ PORT_CLIENT_SECRET is MISSING or EMPTY"
+          else
+            echo "✅ PORT_CLIENT_SECRET is PRESENT"
+          fi
+
+          if [ -z "${{ secrets.JIRA_API_TOKEN }}" ]; then
+            echo "❌ JIRA_API_TOKEN is MISSING or EMPTY"
+          else
+            echo "✅ JIRA_API_TOKEN is PRESENT"
+          fi
+          
+          echo "----------------------------------------------"
+        env:
+          PORT_CLIENT_ID_VAL: ${{ secrets.PORT_CLIENT_ID }}
