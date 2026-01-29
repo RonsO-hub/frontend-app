@@ -48,7 +48,7 @@ jobs:
           PORT_CLIENT_SECRET: ${{ secrets.PORT_CLIENT_SECRET }}
           PORT_BASE_URL: "https://api.port.io"
           OCEAN__INTEGRATION__CONFIG__JIRA_HOST: "https://solomonron.atlassian.net"
-          OCEAN__INTEGRATION__CONFIG__ATLASSIAN_USER_EMAIL: "solomonron@gmail.com"
+          OCEAN__INTEGRATION__CONFIG__ATLASSIAN_USER_EMAIL: "ron.solomon@cellebrite.com"
           OCEAN__INTEGRATION__CONFIG__ATLASSIAN_USER_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
         run: |
           ocean sail --type jira
