@@ -1,8 +1,10 @@
-name: Jira Integration
+name: Manual Jira Integration
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 */1 * * *'
+    inputs:
+      jira_token:
+        description: 'Paste your Atlassian Token (ATATT3...)'
+        required: true
 
 jobs:
   run-integration:
@@ -12,15 +14,14 @@ jobs:
         uses: port-labs/ocean-sail@v1
         with:
           type: jira
-          # We removed the quotes here to let GitHub handle the text format safely
           port_client_id: ${{ secrets.PORT_CLIENT_ID }}
           port_client_secret: ${{ secrets.PORT_CLIENT_SECRET }}
-          port_base_url: https://api.port.io
+          port_base_url: "https://api.port.io"
           config: |
-            jira_host: https://solomonron.atlassian.net
-            atlassian_user_email: solomonron@gmail.com
-            # We removed quotes here too - this is often safer for tokens
-            atlassian_user_token: ${{ secrets.JIRA_API_TOKEN }}
+            jira_host: "https://solomonron.atlassian.net"
+            atlassian_user_email: "solomonron@gmail.com"
+            # We use the value you paste in the popup box:
+            atlassian_user_token: "${{ github.event.inputs.jira_token }}"
             
             resources:
               - kind: issue
