@@ -1,4 +1,4 @@
-name: Jira Integration (Master Config)
+name: Jira Integration (Final Fix)
 on:
   workflow_dispatch:
   schedule:
@@ -8,22 +8,21 @@ jobs:
   run-integration:
     runs-on: ubuntu-latest
     steps:
-      # Step 1: Create a SINGLE file with ALL configurations (including secrets)
-      - name: Create Complete Config
+      # Step 1: Create the Master Config File
+      # We put all secrets and settings into this one file to guarantee the app sees them.
+      - name: Create Config File
         run: |
           cat <<EOF > config.yaml
           port:
             client_id: "${{ secrets.PORT_CLIENT_ID }}"
             client_secret: "${{ secrets.PORT_CLIENT_SECRET }}"
             base_url: "https://api.port.io"
-          
           integration:
             type: jira
             config:
               jira_host: "https://solomonron.atlassian.net"
               atlassian_user_email: "solomonron@gmail.com"
               atlassian_user_token: "${{ secrets.JIRA_API_TOKEN }}"
-          
           resources:
             - kind: issue
               selector:
@@ -46,13 +45,7 @@ jobs:
                       repository: .fields.components[].name
           EOF
 
-      # Step 2: Debug - Check if file exists (Optional but helpful)
-      - name: Verify Config Creation
-        run: ls -l config.yaml
-
-      # Step 3: Run Docker with the Single Config File
+      # Step 2: Run Docker (Single Line Command)
+      # We removed all backslashes to prevent the "argument" error.
       - name: Run Jira Integration
-        run: |
-          docker run --rm \
-            -v $(pwd)/config.yaml:/app/config.yaml \
-            -e OCEAN__CONFIG__PATH="/app/config.yaml" \
+        run: docker run --rm -v $(pwd)/config.yaml:/app/config.yaml -e OCEAN__CONFIG__PATH="/app/config.yaml" ghcr.io/port-labs/port-ocean-jira:latest
