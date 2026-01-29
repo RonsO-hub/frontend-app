@@ -19,7 +19,7 @@ jobs:
           port_base_url: "https://api.port.io"
           config: |
             jira_host: "https://solomonron.atlassian.net"
-            atlassian_user_email: "solomonron@gmail.com"
+            atlassian_user_email: "ron.solomon@cellebrite.com"
             # We use the value you paste in the popup box:
             atlassian_user_token: "${{ github.event.inputs.jira_token }}"
             
