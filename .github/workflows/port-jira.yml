@@ -14,7 +14,7 @@ jobs:
         run: |
           cat <<EOF > config.yaml
           jira_host: "https://solomonron.atlassian.net"
-          atlassian_user_email: "solomonron@gmail.com"
+          atlassian_user_email: "ron.solomon@cellebrite.com"
           atlassian_user_token: "${{ secrets.JIRA_API_TOKEN }}"
           resources:
             - kind: issue
