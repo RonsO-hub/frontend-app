@@ -1,45 +1,54 @@
-name: Manual Jira Integration
+name: Jira Integration (Python Native)
 on:
   workflow_dispatch:
-    inputs:
-      jira_token:
-        description: 'Paste your Atlassian Token (ATATT3...)'
-        required: true
+  schedule:
+    - cron: '0 */1 * * *'
 
 jobs:
   run-integration:
     runs-on: ubuntu-latest
     steps:
-      - name: Run Jira Integration
-        uses: port-labs/ocean-sail@v1
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          type: jira
-          port_client_id: ${{ secrets.PORT_CLIENT_ID }}
-          port_client_secret: ${{ secrets.PORT_CLIENT_SECRET }}
-          port_base_url: "https://api.port.io"
-          config: |
-            jira_host: "https://solomonron.atlassian.net"
-            atlassian_user_email: "ron.solomon@cellebrite.com"
-            # We use the value you paste in the popup box:
-            atlassian_user_token: "${{ github.event.inputs.jira_token }}"
-            
-            resources:
-              - kind: issue
-                selector:
-                  query: "ORDER BY created DESC"
-                port:
-                  entity:
-                    mappings:
-                      identifier: .key
-                      title: .fields.summary
-                      blueprint: '"jiraIssue"'
-                      properties:
-                        status: .fields.status.name
-                        assignee: .fields.assignee.displayName
-                        description: .fields.description
-                        priority: .fields.priority.name
-                        link: .self
-                        created_at: .fields.created
-                        updated_at: .fields.updated
-                      relations:
-                        repository: .fields.components[].name
+          python-version: '3.11'
+
+      - name: Install Jira Integration
+        run: pip install port-ocean-jira
+
+      - name: Create Config File
+        run: |
+          cat <<EOF > port_ocean_config.yaml
+          resources:
+            - kind: issue
+              selector:
+                query: "ORDER BY created DESC"
+              port:
+                entity:
+                  mappings:
+                    identifier: .key
+                    title: .fields.summary
+                    blueprint: '"jiraIssue"'
+                    properties:
+                      status: .fields.status.name
+                      assignee: .fields.assignee.displayName
+                      description: .fields.description
+                      priority: .fields.priority.name
+                      link: .self
+                      created_at: .fields.created
+                      updated_at: .fields.updated
+                    relations:
+                      repository: .fields.components[].name
+          EOF
+
+      - name: Run Integration
+        env:
+          # We pass the secrets directly to the tool, bypassing the buggy wrapper
+          PORT_CLIENT_ID: ${{ secrets.PORT_CLIENT_ID }}
+          PORT_CLIENT_SECRET: ${{ secrets.PORT_CLIENT_SECRET }}
+          PORT_BASE_URL: "https://api.port.io"
+          OCEAN__INTEGRATION__CONFIG__JIRA_HOST: "https://solomonron.atlassian.net"
+          OCEAN__INTEGRATION__CONFIG__ATLASSIAN_USER_EMAIL: "solomonron@gmail.com"
+          OCEAN__INTEGRATION__CONFIG__ATLASSIAN_USER_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+        run: |
+          ocean sail --type jira
