@@ -17,6 +17,7 @@ jobs:
           port_base_url: "https://api.port.io"
           config: |
             # ---------------------------------------------------------
+            # 
             jira_host: "https://solomonron.atlassian.net"
             atlassian_user_email: "solomonron@gmail.com"
             # ---------------------------------------------------------
@@ -26,7 +27,7 @@ jobs:
             resources:
               - kind: issue
                 selector:
-                  query: "true" # Imports all issues. You can filter by project if needed.
+                  query: "true"
                 port:
                   entity:
                     mappings:
@@ -42,6 +43,5 @@ jobs:
                         created_at: .fields.created
                         updated_at: .fields.updated
                       
-             
                       relations:
                         repository: .fields.components[].name
