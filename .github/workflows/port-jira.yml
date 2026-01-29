@@ -1,4 +1,4 @@
-name: Jira Integration (Python Native)
+name: Jira Integration (Docker Native)
 on:
   workflow_dispatch:
   schedule:
@@ -8,17 +8,14 @@ jobs:
   run-integration:
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-
-      - name: Install Jira Integration
-        run: pip install port-ocean-jira
-
+      # Step 1: Create the config file manually
+      # This avoids the "whitespaces" error by writing the file directly
       - name: Create Config File
         run: |
-          cat <<EOF > port_ocean_config.yaml
+          cat <<EOF > config.yaml
+          jira_host: "https://solomonron.atlassian.net"
+          atlassian_user_email: "solomonron@gmail.com"
+          atlassian_user_token: "${{ secrets.JIRA_API_TOKEN }}"
           resources:
             - kind: issue
               selector:
@@ -41,14 +38,14 @@ jobs:
                       repository: .fields.components[].name
           EOF
 
-      - name: Run Integration
-        env:
-          # We pass the secrets directly to the tool, bypassing the buggy wrapper
-          PORT_CLIENT_ID: ${{ secrets.PORT_CLIENT_ID }}
-          PORT_CLIENT_SECRET: ${{ secrets.PORT_CLIENT_SECRET }}
-          PORT_BASE_URL: "https://api.port.io"
-          OCEAN__INTEGRATION__CONFIG__JIRA_HOST: "https://solomonron.atlassian.net"
-          OCEAN__INTEGRATION__CONFIG__ATLASSIAN_USER_EMAIL: "ron.solomon@cellebrite.com"
-          OCEAN__INTEGRATION__CONFIG__ATLASSIAN_USER_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+      # Step 2: Run the container directly
+      # We mount the config file we just made into the container
+      - name: Run Jira Integration
         run: |
-          ocean sail --type jira
+          docker run --rm \
+            -v $(pwd)/config.yaml:/app/config.yaml \
+            -e PORT_CLIENT_ID=${{ secrets.PORT_CLIENT_ID }} \
+            -e PORT_CLIENT_SECRET=${{ secrets.PORT_CLIENT_SECRET }} \
+            -e PORT_BASE_URL="https://api.port.io" \
+            -e OCEAN__CONFIG__PATH="/app/config.yaml" \
+            ghcr.io/port-labs/port-ocean-jira:latest
